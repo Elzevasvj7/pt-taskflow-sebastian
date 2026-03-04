@@ -7,9 +7,9 @@ interface TodoListProps {
   todos: Todo[];
   isLoading: boolean;
   onEdit: (id: Todo['id'], data: UpdateTodoDTO) => Promise<void>;
-
+  onDelete: (id: Todo['id']) => Promise<void>;
 }
-export function TodoList({ todos, isLoading, onEdit }: TodoListProps) {
+export function TodoList({ todos, isLoading, onEdit, onDelete }: TodoListProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
@@ -44,7 +44,7 @@ export function TodoList({ todos, isLoading, onEdit }: TodoListProps) {
       aria-label="Lista de tareas"
     >
       {todos.map((todo) => (
-        <TodoItem key={todo.id} todo={todo} onEdit={onEdit} />
+        <TodoItem key={todo.id} todo={todo} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </ul>
   );

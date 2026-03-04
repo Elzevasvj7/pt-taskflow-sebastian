@@ -96,3 +96,9 @@ export async function updateTodo(
     body: JSON.stringify(data),
   });
 }
+
+export async function deleteTodo(id: string | number): Promise<void> {
+  await request<void>(`/todos/${id}`, {
+    method: "DELETE",
+  });
+}

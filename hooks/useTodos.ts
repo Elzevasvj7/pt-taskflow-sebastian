@@ -5,7 +5,7 @@ import { CreateTodoDTO, Todo, TodoFilter, UpdateTodoDTO } from "@/lib/types";
 import { getTodos } from "@/lib/actions";
 import { filterTodos, getTodoStats, searchTodos } from "@/lib/selectors";
 import type { TodoStats } from "@/lib/selectors";
-import { createTodo, updateTodo } from "@/lib/actions/todo.actions";
+import { createTodo, deleteTodo, updateTodo } from "@/lib/actions/todo.actions";
 import { toast } from "sonner";
 
 // ─── State ──────────────────────────────────────────────────
@@ -44,7 +44,8 @@ type TodoAction =
   | { type: "SET_FILTER"; payload: TodoFilter }
   | { type: "SET_SEARCH_QUERY"; payload: string }
   | { type: "ADD_TODO"; payload: Todo }
-  | { type: "UPDATE_TODO"; payload: Todo };
+  | { type: "UPDATE_TODO"; payload: Todo }
+  | { type: 'REMOVE_TODO'; payload: Todo['id'] };
 
 // ─── Reducer ────────────────────────────────────────────────
 
@@ -80,6 +81,12 @@ function todoReducer(state: TodoState, action: TodoAction): TodoState {
         todos: state.todos.map((t) =>
           t.id === action.payload.id ? action.payload : t,
         ),
+      };
+    case "REMOVE_TODO":
+      return {
+        ...state,
+        todos: state.todos.filter((t) => t.id !== action.payload),
+        total: Math.max(0, state.total - 1),
       };
     default:
       return state;
@@ -125,6 +132,8 @@ export interface UseTodosReturn {
   addTodo: (data: CreateTodoDTO) => Promise<void>;
   /** Edit an existing todo */
   editTodo: (id: Todo["id"], data: UpdateTodoDTO) => Promise<void>;
+  /** Remove a todo */
+  removeTodo: (id: Todo['id']) => Promise<void>;
 }
 
 export interface UseTodosOptions {
@@ -209,6 +218,21 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     [isNotFoundError],
   );
 
+  const removeTodo = useCallback(async (id: Todo['id']) => {
+    try {
+      await deleteTodo(id);
+      dispatch({ type: 'REMOVE_TODO', payload: id });
+    } catch (err) {
+      if (isNotFoundError(err)) {
+        dispatch({ type: 'REMOVE_TODO', payload: id });
+        return;
+      }
+
+      const message = err instanceof Error ? err.message : 'Error al eliminar el todo';
+      toast.error(message);
+    }
+  }, [isNotFoundError]);
+
   const setFilter = useCallback((filter: TodoFilter) => {
     dispatch({ type: "SET_FILTER", payload: filter });
   }, []);
@@ -249,5 +273,6 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     setSearchQuery,
     addTodo,
     editTodo,
+    removeTodo,
   };
 }

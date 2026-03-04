@@ -7,13 +7,10 @@ import type { Todo, UpdateTodoDTO } from "@/lib/types";
 interface TodoItemProps {
   todo: Todo;
   onEdit: (id: Todo['id'], data: UpdateTodoDTO) => Promise<void>;
-
+  onDelete: (id: Todo['id']) => Promise<void>;
 }
 
-export function TodoItem({ todo, onEdit }: TodoItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(todo.todo);
-  const [editDescription, setEditDescription] = useState(todo.todo ?? "");
+export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -21,9 +18,8 @@ export function TodoItem({ todo, onEdit }: TodoItemProps) {
 
   const handleSave = async () => {
     setIsProcessing(true);
-    await onEdit(todo.id, { ...todo, completed: !todo.completed });
     try {
-      setIsEditing(false);
+      await onEdit(todo.id, { ...todo, completed: !todo.completed });
     } finally {
       setIsProcessing(false);
     }
@@ -87,6 +83,7 @@ export function TodoItem({ todo, onEdit }: TodoItemProps) {
             disabled={isProcessing}
             className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
             aria-label="Eliminar"
+            onClick={()=> onDelete(todo.id)}
           >
             <svg
               className="h-3.5 w-3.5"
