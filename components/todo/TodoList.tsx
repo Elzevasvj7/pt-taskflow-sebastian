@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import type { Todo, UpdateTodoDTO } from '@/lib/types';
-import { TodoItem } from './TodoItem';
+import type { Todo, UpdateTodoDTO } from "@/lib/types";
+import { TodoItem } from "./TodoItem";
 
 interface TodoListProps {
   todos: Todo[];
   isLoading: boolean;
 }
-export function TodoList({ todos, isLoading, }: TodoListProps) {
+export function TodoList({ todos, isLoading }: TodoListProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
@@ -36,12 +36,13 @@ export function TodoList({ todos, isLoading, }: TodoListProps) {
   }
 
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2" role="list" aria-label="Lista de tareas">
+    <ul
+      className="grid grid-cols-1 md:grid-cols-2 gap-2"
+      role="list"
+      aria-label="Lista de tareas"
+    >
       {todos.map((todo) => (
-        <TodoItem
-          key={todo.id}
-          todo={todo}
-        />
+        <TodoItem key={todo.id} todo={todo} />
       ))}
     </ul>
   );

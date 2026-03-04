@@ -3,3 +3,4 @@ export { TodoItem } from './TodoItem';
 export { TodoList } from './TodoList';
 export { TodoFilterBar } from './TodoFilterBar';
 export { TodoSearch } from './TodoSearch';
+export { TodoForm } from './TodoForm';

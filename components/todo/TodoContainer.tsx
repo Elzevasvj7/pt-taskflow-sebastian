@@ -6,6 +6,7 @@ import {
   TodoList,
   TodoFilterBar,
   TodoSearch,
+  TodoForm,
 } from "@/components/todo";
 import { useTodos } from "@/hooks/useTodos";
 
@@ -33,6 +34,7 @@ export function TodoContainer() {
     hasNextPage,
     stats,
     loadTodos,
+    addTodo,
     setFilter,
     setSearchQuery,
   } = useTodos({ page, pageSize: DEFAULT_PAGE_SIZE });
@@ -69,6 +71,9 @@ export function TodoContainer() {
           Organiza tu día, una tarea a la vez
         </p>
       </div>
+
+      {/* Form */}
+      <TodoForm onSubmit={addTodo} />
 
       {/* Stats */}
       <div className="flex items-center gap-4 text-xs text-zinc-500 dark:text-zinc-400">

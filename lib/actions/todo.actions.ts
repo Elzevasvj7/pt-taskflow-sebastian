@@ -79,3 +79,10 @@ export async function getTodoById(id: string | number): Promise<Todo | null> {
     throw error;
   }
 }
+
+export async function createTodo(data: CreateTodoDTO): Promise<Todo> {
+  return request<Todo>("/todos/add", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
