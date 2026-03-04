@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useReducer } from "react";
-import { CreateTodoDTO, Todo, TodoFilter } from "@/lib/types";
+import { CreateTodoDTO, Todo, TodoFilter, UpdateTodoDTO } from "@/lib/types";
 import { getTodos } from "@/lib/actions";
 import { filterTodos, getTodoStats, searchTodos } from "@/lib/selectors";
 import type { TodoStats } from "@/lib/selectors";
-import { createTodo } from "@/lib/actions/todo.actions";
+import { createTodo, updateTodo } from "@/lib/actions/todo.actions";
 import { toast } from "sonner";
 
 // ─── State ──────────────────────────────────────────────────
@@ -35,25 +35,26 @@ const initialState: TodoState = {
 // ─── Actions ────────────────────────────────────────────────
 
 type TodoAction =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
   | {
-      type: 'SET_TODOS';
+      type: "SET_TODOS";
       payload: { todos: Todo[]; total: number; limit: number; skip: number };
     }
-  | { type: 'SET_FILTER'; payload: TodoFilter }
-  | { type: 'SET_SEARCH_QUERY'; payload: string }
-  | { type: 'ADD_TODO'; payload: Todo };
+  | { type: "SET_FILTER"; payload: TodoFilter }
+  | { type: "SET_SEARCH_QUERY"; payload: string }
+  | { type: "ADD_TODO"; payload: Todo }
+  | { type: "UPDATE_TODO"; payload: Todo };
 
 // ─── Reducer ────────────────────────────────────────────────
 
 function todoReducer(state: TodoState, action: TodoAction): TodoState {
   switch (action.type) {
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return { ...state, error: action.payload, isLoading: false };
-    case 'SET_TODOS':
+    case "SET_TODOS":
       return {
         ...state,
         todos: action.payload.todos,
@@ -63,15 +64,22 @@ function todoReducer(state: TodoState, action: TodoAction): TodoState {
         isLoading: false,
         error: null,
       };
-    case 'SET_FILTER':
+    case "SET_FILTER":
       return { ...state, filter: action.payload };
-    case 'SET_SEARCH_QUERY':
+    case "SET_SEARCH_QUERY":
       return { ...state, searchQuery: action.payload };
-    case 'ADD_TODO':
+    case "ADD_TODO":
       return {
         ...state,
         todos: [action.payload, ...state.todos],
         total: state.total + 1,
+      };
+    case "UPDATE_TODO":
+      return {
+        ...state,
+        todos: state.todos.map((t) =>
+          t.id === action.payload.id ? action.payload : t,
+        ),
       };
     default:
       return state;
@@ -115,6 +123,8 @@ export interface UseTodosReturn {
   setSearchQuery: (query: string) => void;
   /** Add a new todo */
   addTodo: (data: CreateTodoDTO) => Promise<void>;
+  /** Edit an existing todo */
+  editTodo: (id: Todo["id"], data: UpdateTodoDTO) => Promise<void>;
 }
 
 export interface UseTodosOptions {
@@ -124,20 +134,31 @@ export interface UseTodosOptions {
 
 export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
   const page = options.page && options.page > 0 ? options.page : 1;
-  const pageSize = options.pageSize && options.pageSize > 0 ? options.pageSize : 10;
+  const pageSize =
+    options.pageSize && options.pageSize > 0 ? options.pageSize : 10;
   const [state, dispatch] = useReducer(todoReducer, initialState);
+
+  const isNotFoundError = useCallback((error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("404") ||
+      message.includes("not found") ||
+      message.includes("no encontrado")
+    );
+  }, []);
 
   const createRandomTodoId = useCallback((): number => {
     return Date.now() + Math.floor(Math.random() * 10000);
   }, []);
 
   const loadTodos = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
       const skip = (page - 1) * pageSize;
       const data = await getTodos({ limit: pageSize, skip });
       dispatch({
-        type: 'SET_TODOS',
+        type: "SET_TODOS",
         payload: {
           todos: data.todos,
           total: data.total,
@@ -147,8 +168,9 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
       });
     } catch (err) {
       dispatch({
-        type: 'SET_ERROR',
-        payload: err instanceof Error ? err.message : 'Error al cargar los todos',
+        type: "SET_ERROR",
+        payload:
+          err instanceof Error ? err.message : "Error al cargar los todos",
       });
     }
   }, [page, pageSize]);
@@ -167,6 +189,24 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
       }
     },
     [createRandomTodoId],
+  );
+
+  const editTodo = useCallback(
+    async (id: Todo["id"], data: UpdateTodoDTO) => {
+      try {
+        const updated = await updateTodo(id, data);
+        dispatch({ type: "UPDATE_TODO", payload: updated });
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          dispatch({ type: "UPDATE_TODO", payload: data });
+          return;
+        }
+        toast.error(
+          err instanceof Error ? err.message : "Error al actualizar el todo",
+        );
+      }
+    },
+    [isNotFoundError],
   );
 
   const setFilter = useCallback((filter: TodoFilter) => {
@@ -208,5 +248,6 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     setFilter,
     setSearchQuery,
     addTodo,
+    editTodo,
   };
 }

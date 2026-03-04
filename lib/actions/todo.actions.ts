@@ -86,3 +86,13 @@ export async function createTodo(data: CreateTodoDTO): Promise<Todo> {
     body: JSON.stringify(data),
   });
 }
+
+export async function updateTodo(
+  id: string | number,
+  data: UpdateTodoDTO,
+): Promise<Todo> {
+  return request<Todo>(`/todos/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
