@@ -222,12 +222,12 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     try {
       await deleteTodo(id);
       dispatch({ type: 'REMOVE_TODO', payload: id });
+      toast.success('Tarea eliminada correctamente');
     } catch (err) {
       if (isNotFoundError(err)) {
         dispatch({ type: 'REMOVE_TODO', payload: id });
         return;
       }
-
       const message = err instanceof Error ? err.message : 'Error al eliminar el todo';
       toast.error(message);
     }
