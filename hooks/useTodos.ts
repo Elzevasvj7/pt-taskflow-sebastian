@@ -25,7 +25,7 @@ const initialState: TodoState = {
   todos: [],
   filter: "all",
   searchQuery: "",
-  isLoading: false,
+  isLoading: true,
   error: null,
   total: 0,
   limit: 10,
