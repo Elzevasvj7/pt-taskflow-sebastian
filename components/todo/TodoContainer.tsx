@@ -125,7 +125,12 @@ export function TodoContainer() {
         </div>
       )}
       {/* List */}
-      <TodoList todos={displayTodos} isLoading={isLoading} onEdit={editTodo} onDelete={removeTodo} />
+      <TodoList
+        todos={displayTodos}
+        isLoading={isLoading}
+        onEdit={editTodo}
+        onDelete={removeTodo}
+      />
 
       <div className="flex items-center justify-between flex-col md:flex-row gap-3 border-t border-zinc-200 pt-3 text-sm dark:border-zinc-800">
         <div className="text-zinc-600 dark:text-zinc-400">

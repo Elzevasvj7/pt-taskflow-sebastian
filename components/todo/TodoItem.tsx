@@ -14,11 +14,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-
 interface TodoItemProps {
   todo: Todo;
-  onEdit: (id: Todo['id'], data: UpdateTodoDTO) => Promise<void>;
-  onDelete: (id: Todo['id']) => Promise<void>;
+  onEdit: (id: Todo["id"], data: UpdateTodoDTO) => Promise<void>;
+  onDelete: (id: Todo["id"]) => Promise<void>;
 }
 
 export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
@@ -137,14 +136,19 @@ export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>¿Eliminar tarea?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta acción no se puede deshacer. La tarea será eliminada de forma permanente.
+                  Esta acción no se puede deshacer. La tarea será eliminada de
+                  forma permanente.
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
-              {deleteError && <p className="text-sm text-red-500">{deleteError}</p>}
+              {deleteError && (
+                <p className="text-sm text-red-500">{deleteError}</p>
+              )}
 
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={isProcessing}>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel disabled={isProcessing}>
+                  Cancelar
+                </AlertDialogCancel>
                 <AlertDialogAction
                   disabled={isProcessing}
                   onClick={(event) => {

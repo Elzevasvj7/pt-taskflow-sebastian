@@ -4,8 +4,8 @@ import {
   createTodo,
   updateTodo,
   deleteTodo,
-} from '@/lib/actions/todo.actions';
-import type { Todo, PaginatedResponse } from '@/lib/types';
+} from "@/lib/actions/todo.actions";
+import type { Todo, PaginatedResponse } from "@/lib/types";
 
 // ─── Mock Setup ─────────────────────────────────────────────
 
@@ -16,13 +16,13 @@ global.fetch = mockFetch;
 
 const seedTodos: Todo[] = [
   {
-    id: '1',
-    todo: 'First todo',
+    id: "1",
+    todo: "First todo",
     completed: false,
   },
   {
-    id: '2',
-    todo: 'Second todo',
+    id: "2",
+    todo: "Second todo",
     completed: true,
   },
 ];
@@ -56,8 +56,8 @@ beforeEach(() => {
 
 // ─── getTodos ───────────────────────────────────────────────
 
-describe('getTodos', () => {
-  it('returns paginated response with todos', async () => {
+describe("getTodos", () => {
+  it("returns paginated response with todos", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse(paginatedResponse));
 
     const result = await getTodos();
@@ -66,56 +66,55 @@ describe('getTodos', () => {
     expect(result.skip).toBe(0);
     expect(result.limit).toBe(10);
   });
-  it('includes pagination params in query string', async () => {
+  it("includes pagination params in query string", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse(paginatedResponse));
 
     await getTodos({ limit: 5, skip: 10 });
 
     const callUrl = mockFetch.mock.calls[0][0] as string;
-    expect(callUrl).toContain('limit=5');
-    expect(callUrl).toContain('skip=10');
+    expect(callUrl).toContain("limit=5");
+    expect(callUrl).toContain("skip=10");
   });
 });
 
 // ─── getTodoById ────────────────────────────────────────────
 
-describe('getTodoById', () => {
-  it('returns the todo by id', async () => {
+describe("getTodoById", () => {
+  it("returns the todo by id", async () => {
     mockFetch.mockResolvedValueOnce(mockResponse(seedTodos[0]));
 
-    const todo = await getTodoById('1');
+    const todo = await getTodoById("1");
     expect(todo).not.toBeNull();
-    expect(todo?.todo).toBe('First todo');
+    expect(todo?.todo).toBe("First todo");
   });
 
-  it('returns null for nonexistent id', async () => {
+  it("returns null for nonexistent id", async () => {
     mockFetch.mockResolvedValueOnce(mockErrorResponse(404));
 
-    const todo = await getTodoById('nonexistent');
+    const todo = await getTodoById("nonexistent");
     expect(todo).toBeNull();
   });
-
 });
 
 // ─── createTodo ─────────────────────────────────────────────
 
-describe('createTodo', () => {
-  it('creates a new todo and sends expected payload', async () => {
+describe("createTodo", () => {
+  it("creates a new todo and sends expected payload", async () => {
     const createdTodo: Todo = {
-      id: '3',
-      todo: 'New task',
+      id: "3",
+      todo: "New task",
       completed: false,
     };
     mockFetch.mockResolvedValueOnce(mockResponse(createdTodo));
 
-    const newTodo = await createTodo({ todo: 'New task', userId: 5 });
+    const newTodo = await createTodo({ todo: "New task", userId: 5 });
 
-    expect(newTodo.todo).toBe('New task');
+    expect(newTodo.todo).toBe("New task");
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/todos/add'),
+      expect.stringContaining("/todos/add"),
       expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ todo: 'New task', userId: 5 }),
+        method: "POST",
+        body: JSON.stringify({ todo: "New task", userId: 5 }),
       }),
     );
   });
@@ -123,48 +122,47 @@ describe('createTodo', () => {
 
 // ─── updateTodo ─────────────────────────────────────────────
 
-describe('updateTodo', () => {
-  it('updates completed status', async () => {
+describe("updateTodo", () => {
+  it("updates completed status", async () => {
     const updatedTodo: Todo = {
       ...seedTodos[0],
       completed: true,
     };
     mockFetch.mockResolvedValueOnce(mockResponse(updatedTodo));
 
-    const updated = await updateTodo('1', { completed: true});
+    const updated = await updateTodo("1", { completed: true });
     expect(updated.completed).toBe(true);
   });
 
-   it('throws for nonexistent id', async () => {
+  it("throws for nonexistent id", async () => {
     mockFetch.mockResolvedValueOnce(mockErrorResponse(404));
 
-    await expect(updateTodo('nonexistent', {completed: true})).rejects.toThrow();
+    await expect(
+      updateTodo("nonexistent", { completed: true }),
+    ).rejects.toThrow();
   });
-
-
 });
 
 // ─── deleteTodo ─────────────────────────────────────────────
 
-describe('deleteTodo', () => {
-  it('calls DELETE endpoint successfully', async () => {
+describe("deleteTodo", () => {
+  it("calls DELETE endpoint successfully", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 204,
       json: async () => undefined,
     } as Response);
 
-    await expect(deleteTodo('1')).resolves.toBeUndefined();
+    await expect(deleteTodo("1")).resolves.toBeUndefined();
   });
 
-  it('throws for nonexistent id', async () => {
+  it("throws for nonexistent id", async () => {
     mockFetch.mockResolvedValueOnce(
       mockErrorResponse(404, 'Todo with id "nonexistent" not found'),
     );
 
-    await expect(deleteTodo('nonexistent')).rejects.toThrow(
+    await expect(deleteTodo("nonexistent")).rejects.toThrow(
       'Todo with id "nonexistent" not found',
     );
   });
-
 });

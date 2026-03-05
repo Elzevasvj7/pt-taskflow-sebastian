@@ -4,15 +4,15 @@ Aplicación de gestión de tareas construida con **Next.js 16**, **React 19** y 
 
 ## Stack Técnico
 
-| Capa | Tecnología |
-| --- | --- |
-| Framework | Next.js 16 (App Router) |
-| UI | React 19, Tailwind CSS 4 |
-| Estado | `useReducer` (hook personalizado `useTodos`) |
-| API | Server Actions → dummyjson REST API |
-| Tests | Jest 30, Testing Library |
-| Calidad | ESLint, Prettier |
-| UI Components | Radix UI (Alert Dialog), Sonner (toasts) |
+| Capa          | Tecnología                                   |
+| ------------- | -------------------------------------------- |
+| Framework     | Next.js 16 (App Router)                      |
+| UI            | React 19, Tailwind CSS 4                     |
+| Estado        | `useReducer` (hook personalizado `useTodos`) |
+| API           | Server Actions → dummyjson REST API          |
+| Tests         | Jest 30, Testing Library                     |
+| Calidad       | ESLint, Prettier                             |
+| UI Components | Radix UI (Alert Dialog), Sonner (toasts)     |
 
 ## Arquitectura
 
@@ -67,7 +67,7 @@ Con `useState` (ya sea múltiples states o un solo objeto), se pierde la central
 
 ### Post-respuesta en lugar de Optimistic Update
 
-La app usa un patrón **post-respuesta**: cada acción (crear, editar, toggle, eliminar) **espera la respuesta del servidor antes de hacer `dispatch`** al reducer. Es decir, la UI solo se actualiza *después* de confirmar el resultado con la API.
+La app usa un patrón **post-respuesta**: cada acción (crear, editar, toggle, eliminar) **espera la respuesta del servidor antes de hacer `dispatch`** al reducer. Es decir, la UI solo se actualiza _después_ de confirmar el resultado con la API.
 
 ```
 Post-respuesta:           await servidor → dispatch → UI se actualiza
@@ -86,11 +86,11 @@ dummyjson devuelve siempre `id: 255` para task creados, por lo que la app genera
 
 ```ts
 try {
-  const updated = await toggleTodo(id);              // servidor primero
-  dispatch({ type: 'UPDATE_TODO', payload: updated });
+  const updated = await toggleTodo(id); // servidor primero
+  dispatch({ type: "UPDATE_TODO", payload: updated });
 } catch (err) {
   if (isNotFoundError(err)) {
-    dispatch({ type: 'TOGGLE_TODO', payload: id });  // fallback local
+    dispatch({ type: "TOGGLE_TODO", payload: id }); // fallback local
     return;
   }
   toast.error(/* ... */);
@@ -103,14 +103,14 @@ Esto permite que los todos creados en la sesión funcionen correctamente a pesar
 
 ## Scripts disponibles
 
-| Comando | Descripción |
-| --- | --- |
-| `pnpm dev` | Inicia el servidor de desarrollo |
-| `pnpm build` | Genera el build de producción |
-| `pnpm start` | Sirve el build de producción |
-| `pnpm lint` | Ejecuta ESLint |
-| `pnpm format` | Formatea el código con Prettier |
-| `pnpm test` | Ejecuta las pruebas unitarias con Jest |
+| Comando           | Descripción                                                |
+| ----------------- | ---------------------------------------------------------- |
+| `pnpm dev`        | Inicia el servidor de desarrollo                           |
+| `pnpm build`      | Genera el build de producción                              |
+| `pnpm start`      | Sirve el build de producción                               |
+| `pnpm lint`       | Ejecuta ESLint                                             |
+| `pnpm format`     | Formatea el código con Prettier                            |
+| `pnpm test`       | Ejecuta las pruebas unitarias con Jest                     |
 | `pnpm test:watch` | Ejecuta Jest en modo watch (re-ejecuta al guardar cambios) |
 
 ## Tests
@@ -158,8 +158,8 @@ Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
 
 ### Variables de entorno
 
-| Variable | Default | Descripción |
-| --- | --- | --- |
+| Variable  | Default                 | Descripción                 |
+| --------- | ----------------------- | --------------------------- |
 | `API_URL` | `http://localhost:3001` | URL base de la API de todos |
 
 Para usar dummyjson directamente, crear `.env.local`:
@@ -170,15 +170,15 @@ API_URL=https://dummyjson.com
 
 ## Scripts
 
-| Script | Descripción |
-| --- | --- |
-| `pnpm dev` | Servidor de desarrollo |
-| `pnpm build` | Build de producción |
-| `pnpm start` | Servidor de producción |
-| `pnpm lint` | Ejecutar ESLint |
-| `pnpm format` | Formatear código con Prettier |
-| `pnpm test` | Ejecutar tests |
-| `pnpm test:watch` | Tests en modo watch |
+| Script            | Descripción                   |
+| ----------------- | ----------------------------- |
+| `pnpm dev`        | Servidor de desarrollo        |
+| `pnpm build`      | Build de producción           |
+| `pnpm start`      | Servidor de producción        |
+| `pnpm lint`       | Ejecutar ESLint               |
+| `pnpm format`     | Formatear código con Prettier |
+| `pnpm test`       | Ejecutar tests                |
+| `pnpm test:watch` | Tests en modo watch           |
 
 ## Testing
 

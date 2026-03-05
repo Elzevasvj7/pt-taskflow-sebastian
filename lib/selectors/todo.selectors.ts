@@ -5,7 +5,7 @@
  * These functions have no side effects and are easy to test.
  */
 
-import { Todo, TodoFilter, TodoStatus } from '@/lib/types';
+import { Todo, TodoFilter, TodoStatus } from "@/lib/types";
 
 type CompatibleTodo = Todo & {
   title?: string;
@@ -15,8 +15,8 @@ type CompatibleTodo = Todo & {
 };
 
 function isCompleted(todo: CompatibleTodo): boolean {
-  if (typeof todo.completed === 'boolean') return todo.completed;
-  return todo.status === 'completed';
+  if (typeof todo.completed === "boolean") return todo.completed;
+  return todo.status === "completed";
 }
 
 function isPending(todo: CompatibleTodo): boolean {
@@ -25,18 +25,18 @@ function isPending(todo: CompatibleTodo): boolean {
 
 function getSearchableText(todo: CompatibleTodo): string {
   return [todo.todo, todo.title, todo.description]
-    .filter((value): value is string => typeof value === 'string')
-    .join(' ')
+    .filter((value): value is string => typeof value === "string")
+    .join(" ")
     .toLowerCase();
 }
 
 export function filterTodos(todos: Todo[], filter: TodoFilter): Todo[] {
   switch (filter) {
-    case 'pending':
+    case "pending":
       return todos.filter((todo) => isPending(todo));
-    case 'completed':
+    case "completed":
       return todos.filter((todo) => isCompleted(todo));
-    case 'all':
+    case "all":
     default:
       return todos;
   }
@@ -46,7 +46,9 @@ export function searchTodos(todos: Todo[], query: string): Todo[] {
   const normalizedQuery = query.toLowerCase().trim();
   if (!normalizedQuery) return todos;
 
-  return todos.filter((todo) => getSearchableText(todo).includes(normalizedQuery));
+  return todos.filter((todo) =>
+    getSearchableText(todo).includes(normalizedQuery),
+  );
 }
 export interface TodoStats {
   total: number;

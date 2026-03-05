@@ -1,4 +1,4 @@
-export type TodoStatus = 'pending' | 'completed';
+export type TodoStatus = "pending" | "completed";
 
 export interface Todo {
   id: string | number;
@@ -16,7 +16,7 @@ export interface UpdateTodoDTO {
   completed: boolean;
 }
 
-export type TodoFilter = 'all' | 'pending' | 'completed';
+export type TodoFilter = "all" | "pending" | "completed";
 
 export interface PaginationParams {
   limit?: number;

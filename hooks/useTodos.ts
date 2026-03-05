@@ -44,8 +44,8 @@ type TodoAction =
   | { type: "SET_FILTER"; payload: TodoFilter }
   | { type: "SET_SEARCH_QUERY"; payload: string }
   | { type: "ADD_TODO"; payload: Todo }
-  | { type: "UPDATE_TODO"; payload: {id: Todo["id"], data: UpdateTodoDTO} }
-  | { type: 'REMOVE_TODO'; payload: Todo['id'] };
+  | { type: "UPDATE_TODO"; payload: { id: Todo["id"]; data: UpdateTodoDTO } }
+  | { type: "REMOVE_TODO"; payload: Todo["id"] };
 
 // ─── Reducer ────────────────────────────────────────────────
 
@@ -79,7 +79,9 @@ function todoReducer(state: TodoState, action: TodoAction): TodoState {
       return {
         ...state,
         todos: state.todos.map((t) =>
-          t.id === action.payload.id ? {...t, completed: action.payload.data.completed} : t,
+          t.id === action.payload.id
+            ? { ...t, completed: action.payload.data.completed }
+            : t,
         ),
       };
     case "REMOVE_TODO":
@@ -133,7 +135,7 @@ export interface UseTodosReturn {
   /** Edit an existing todo */
   editTodo: (id: Todo["id"], data: UpdateTodoDTO) => Promise<void>;
   /** Remove a todo */
-  removeTodo: (id: Todo['id']) => Promise<void>;
+  removeTodo: (id: Todo["id"]) => Promise<void>;
 }
 
 export interface UseTodosOptions {
@@ -204,10 +206,13 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     async (id: Todo["id"], data: UpdateTodoDTO) => {
       try {
         const updated = await updateTodo(id, data);
-        dispatch({ type: "UPDATE_TODO", payload: {id: id, data: {completed: updated.completed}} });
+        dispatch({
+          type: "UPDATE_TODO",
+          payload: { id: id, data: { completed: updated.completed } },
+        });
       } catch (err) {
         if (isNotFoundError(err)) {
-          dispatch({ type: "UPDATE_TODO", payload: {id, data} });
+          dispatch({ type: "UPDATE_TODO", payload: { id, data } });
           return;
         }
         toast.error(
@@ -218,20 +223,24 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     [isNotFoundError],
   );
 
-  const removeTodo = useCallback(async (id: Todo['id']) => {
-    try {
-      await deleteTodo(id);
-      dispatch({ type: 'REMOVE_TODO', payload: id });
-      toast.success('Tarea eliminada correctamente');
-    } catch (err) {
-      if (isNotFoundError(err)) {
-        dispatch({ type: 'REMOVE_TODO', payload: id });
-        return;
+  const removeTodo = useCallback(
+    async (id: Todo["id"]) => {
+      try {
+        await deleteTodo(id);
+        dispatch({ type: "REMOVE_TODO", payload: id });
+        toast.success("Tarea eliminada correctamente");
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          dispatch({ type: "REMOVE_TODO", payload: id });
+          return;
+        }
+        const message =
+          err instanceof Error ? err.message : "Error al eliminar el todo";
+        toast.error(message);
       }
-      const message = err instanceof Error ? err.message : 'Error al eliminar el todo';
-      toast.error(message);
-    }
-  }, [isNotFoundError]);
+    },
+    [isNotFoundError],
+  );
 
   const setFilter = useCallback((filter: TodoFilter) => {
     dispatch({ type: "SET_FILTER", payload: filter });
