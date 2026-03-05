@@ -30,7 +30,7 @@ export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
   const handleSave = async () => {
     setIsProcessing(true);
     try {
-      await onEdit(todo.id, { ...todo, completed: !todo.completed });
+      await onEdit(todo.id, { completed: !todo.completed });
     } finally {
       setIsProcessing(false);
     }
