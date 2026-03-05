@@ -48,20 +48,6 @@ export function searchTodos(todos: Todo[], query: string): Todo[] {
 
   return todos.filter((todo) => getSearchableText(todo).includes(normalizedQuery));
 }
-
-export function sortTodosByDate(
-  todos: CompatibleTodo[],
-  order: 'asc' | 'desc' = 'desc',
-): CompatibleTodo[] {
-  const sorted = [...todos].sort((a, b) => {
-    const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return aDate - bDate;
-  });
-
-  return order === 'desc' ? sorted.reverse() : sorted;
-}
-
 export interface TodoStats {
   total: number;
   pending: number;

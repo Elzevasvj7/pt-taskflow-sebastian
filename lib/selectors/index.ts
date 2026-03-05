@@ -1,7 +1,6 @@
 export {
   filterTodos,
   searchTodos,
-  sortTodosByDate,
   getTodoStats,
   isTodoOverdue,
 } from './todo.selectors';

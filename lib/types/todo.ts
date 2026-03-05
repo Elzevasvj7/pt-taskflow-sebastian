@@ -13,8 +13,6 @@ export interface CreateTodoDTO {
 }
 
 export interface UpdateTodoDTO {
-  id: string | number;
-  todo: string;
   completed: boolean;
 }
 
