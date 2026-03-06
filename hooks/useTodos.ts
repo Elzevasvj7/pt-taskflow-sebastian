@@ -159,8 +159,12 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     );
   }, []);
 
-  const createRandomTodoId = useCallback((): number => {
-    return Date.now() + Math.floor(Math.random() * 10000);
+  const createRandomTodoId = useCallback((): string => {
+    return `local-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+  }, []);
+
+  const isLocalTodoId = useCallback((id: Todo["id"]): boolean => {
+    return typeof id === "string";
   }, []);
 
   const loadTodos = useCallback(async () => {
@@ -204,6 +208,11 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
 
   const editTodo = useCallback(
     async (id: Todo["id"], data: UpdateTodoDTO) => {
+      if (isLocalTodoId(id)) {
+        dispatch({ type: "UPDATE_TODO", payload: { id, data } });
+        return;
+      }
+
       try {
         const updated = await updateTodo(id, data);
         dispatch({
@@ -220,11 +229,16 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
         );
       }
     },
-    [isNotFoundError],
+    [isLocalTodoId, isNotFoundError],
   );
 
   const removeTodo = useCallback(
     async (id: Todo["id"]) => {
+      if (isLocalTodoId(id)) {
+        dispatch({ type: "REMOVE_TODO", payload: id });
+        return;
+      }
+
       try {
         await deleteTodo(id);
         dispatch({ type: "REMOVE_TODO", payload: id });
@@ -239,7 +253,7 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
         toast.error(message);
       }
     },
-    [isNotFoundError],
+    [isLocalTodoId, isNotFoundError],
   );
 
   const setFilter = useCallback((filter: TodoFilter) => {
