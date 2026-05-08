@@ -1,15 +1,19 @@
+import type { NoteColorId } from "@/lib/note-colors";
+
 export type TodoStatus = "pending" | "completed";
 
 export interface Todo {
   id: string | number;
   todo: string;
   completed: boolean;
+  color?: NoteColorId;
 }
 
 export interface CreateTodoDTO {
   todo: string;
   completed?: boolean;
   userId: number;
+  color?: NoteColorId;
 }
 
 export interface UpdateTodoDTO {

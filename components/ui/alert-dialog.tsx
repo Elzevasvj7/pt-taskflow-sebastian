@@ -50,7 +50,7 @@ function AlertDialogContent({
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-zinc-200 bg-white p-6 shadow-lg dark:border-zinc-700 dark:bg-zinc-900",
+          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-2xl border border-[var(--border)] bg-[var(--panel)] p-6 shadow-[0_24px_70px_-40px_rgba(40,14,35,0.75)]",
           className,
         )}
         {...props}
@@ -93,7 +93,7 @@ function AlertDialogTitle({
   return (
     <AlertDialogPrimitive.Title
       className={cn(
-        "text-base font-semibold text-zinc-900 dark:text-zinc-100",
+        "text-base font-semibold text-[color:var(--foreground)]",
         className,
       )}
       {...props}
@@ -107,7 +107,7 @@ function AlertDialogDescription({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
   return (
     <AlertDialogPrimitive.Description
-      className={cn("text-sm text-zinc-600 dark:text-zinc-400", className)}
+      className={cn("text-sm text-[color:var(--foreground)]/75", className)}
       {...props}
     />
   );
@@ -120,7 +120,7 @@ function AlertDialogAction({
   return (
     <AlertDialogPrimitive.Action
       className={cn(
-        "inline-flex h-9 items-center justify-center rounded-md bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-9 items-center justify-center rounded-xl bg-[var(--danger)] px-4 text-sm font-medium text-white transition-colors hover:brightness-95 disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}
@@ -135,7 +135,7 @@ function AlertDialogCancel({
   return (
     <AlertDialogPrimitive.Cancel
       className={cn(
-        "inline-flex h-9 items-center justify-center rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 disabled:pointer-events-none disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700",
+        "inline-flex h-9 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--panel-strong)] px-4 text-sm font-medium text-[color:var(--foreground)] transition-colors hover:bg-[var(--accent-soft)] disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}

@@ -1,7 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { Check, Trash2, Pin } from "lucide-react";
 import type { Todo, UpdateTodoDTO } from "@/lib/types";
+import {
+  DEFAULT_NOTE_COLOR,
+  NOTE_COLOR_IDS,
+  NOTE_COLOR_STYLES,
+  type NoteColorId,
+} from "@/lib/note-colors";
+import {
+  getServerThemeSnapshot,
+  getThemeSnapshot,
+  subscribeToTheme,
+} from "@/lib/theme";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +32,28 @@ interface TodoItemProps {
   onDelete: (id: Todo["id"]) => Promise<void>;
 }
 
+function getStickyColor(color: NoteColorId | undefined, isDark: boolean) {
+  const resolvedColor = color ?? DEFAULT_NOTE_COLOR;
+  const palette = NOTE_COLOR_STYLES[resolvedColor] ?? NOTE_COLOR_STYLES.yellow;
+  return isDark ? palette.dark : palette.light;
+}
+
 export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const isCompleted = todo.completed;
+  const theme = useSyncExternalStore(
+    subscribeToTheme,
+    getThemeSnapshot,
+    getServerThemeSnapshot,
+  );
+
+  const isDark = theme === "dark";
+  const fallbackColor =
+    NOTE_COLOR_IDS[parseInt(String(todo.id), 36) % NOTE_COLOR_IDS.length] ??
+    DEFAULT_NOTE_COLOR;
+  const stickyColor = getStickyColor(todo.color ?? fallbackColor, isDark);
 
   const handleSave = async () => {
     setIsProcessing(true);
@@ -51,116 +80,100 @@ export function TodoItem({ todo, onEdit, onDelete }: TodoItemProps) {
 
   return (
     <li
-      className={`group rounded-lg border bg-white p-4 transition-all hover:shadow-sm dark:bg-zinc-800 ${
-        isCompleted
-          ? "border-zinc-100 dark:border-zinc-800"
-          : "border-zinc-200 dark:border-zinc-700"
+      className={`group relative min-h-[20rem] rounded-[1.9rem] border p-7 transition-all hover:-translate-y-1.5 ${stickyColor.bg} ${stickyColor.border} ${stickyColor.shadow} ${
+        isCompleted ? "opacity-70" : ""
       } ${isProcessing ? "opacity-60" : ""}`}
     >
-      <div className="flex items-start gap-3">
-        {/* Checkbox */}
-        <button
-          onClick={handleSave}
-          disabled={isProcessing}
-          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-            isCompleted
-              ? "border-emerald-500 bg-emerald-500 text-white"
-              : "border-zinc-300 hover:border-zinc-400 dark:border-zinc-600 dark:hover:border-zinc-500"
-          }`}
-          aria-label={
-            isCompleted ? "Marcar como pendiente" : "Marcar como completado"
-          }
-        >
-          {isCompleted && (
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          )}
-        </button>
+      <div className="absolute bottom-6 right-6">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--foreground)] text-[var(--panel)] shadow-[0_16px_28px_-20px_rgba(0,0,0,0.75)]">
+          <Pin className="h-5 w-5" strokeWidth={2.3} />
+        </div>
+      </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <p
-            className={`text-sm font-medium leading-snug ${
+      <div className="flex h-full flex-col gap-6">
+        <div className="flex items-start justify-between gap-3">
+          <button
+            onClick={handleSave}
+            disabled={isProcessing}
+            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 bg-white/55 transition-all ${
               isCompleted
-                ? "text-zinc-400 line-through dark:text-zinc-500"
-                : "text-zinc-900 dark:text-zinc-100"
+                ? "border-[var(--success)] bg-[var(--success)] text-white scale-90"
+                : "border-[color:var(--foreground)]/18 hover:scale-110"
+            }`}
+            style={
+              !isCompleted ? { borderColor: stickyColor.accent } : undefined
+            }
+            aria-label={
+              isCompleted ? "Marcar como pendiente" : "Marcar como completado"
+            }
+          >
+            {isCompleted && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+          </button>
+
+          <div className="flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+            <AlertDialog
+              open={isDeleteModalOpen}
+              onOpenChange={(open) => {
+                setIsDeleteModalOpen(open);
+                if (open) setDeleteError(null);
+              }}
+            >
+              <AlertDialogTrigger asChild>
+                <button
+                  disabled={isProcessing}
+                  className="rounded-full p-2 text-[color:var(--foreground)]/55 transition hover:bg-black/6 hover:text-[var(--danger)]"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar tarea?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. La tarea será eliminada de
+                    forma permanente.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                {deleteError && (
+                  <p className="text-sm text-red-500">{deleteError}</p>
+                )}
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isProcessing}>
+                    Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={isProcessing}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      void handleDelete();
+                    }}
+                  >
+                    {isProcessing ? "Eliminando..." : "Eliminar"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+
+        <div className="min-w-0 pt-3">
+          <p
+            className={`max-w-[18ch] text-[2rem] leading-[1.12] font-medium tracking-[-0.05em] ${
+              isCompleted
+                ? "text-[color:var(--foreground)]/45 line-through"
+                : "text-[color:var(--foreground)]"
             }`}
           >
             {todo.todo}
           </p>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <AlertDialog
-            open={isDeleteModalOpen}
-            onOpenChange={(open) => {
-              setIsDeleteModalOpen(open);
-              if (open) setDeleteError(null);
-            }}
-          >
-            <AlertDialogTrigger asChild>
-              <button
-                disabled={isProcessing}
-                className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                aria-label="Eliminar"
-              >
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            </AlertDialogTrigger>
-
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Eliminar tarea?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer. La tarea será eliminada de
-                  forma permanente.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              {deleteError && (
-                <p className="text-sm text-red-500">{deleteError}</p>
-              )}
-
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isProcessing}>
-                  Cancelar
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  disabled={isProcessing}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void handleDelete();
-                  }}
-                >
-                  {isProcessing ? "Eliminando..." : "Eliminar"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <div className="mt-auto pt-6 text-sm text-[color:var(--foreground)]/62">
+          {isCompleted ? "Completada" : "Pendiente"}
         </div>
       </div>
     </li>

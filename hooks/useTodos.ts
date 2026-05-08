@@ -7,6 +7,7 @@ import { filterTodos, getTodoStats, searchTodos } from "@/lib/selectors";
 import type { TodoStats } from "@/lib/selectors";
 import { createTodo, deleteTodo, updateTodo } from "@/lib/actions/todo.actions";
 import { toast } from "sonner";
+import { DEFAULT_NOTE_COLOR } from "@/lib/note-colors";
 
 // ─── State ──────────────────────────────────────────────────
 
@@ -194,7 +195,11 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     async (data: CreateTodoDTO) => {
       try {
         const newTodo = await createTodo(data);
-        const localTodo: Todo = { ...newTodo, id: createRandomTodoId() };
+        const localTodo: Todo = {
+          ...newTodo,
+          id: createRandomTodoId(),
+          color: data.color ?? DEFAULT_NOTE_COLOR,
+        };
         dispatch({ type: "ADD_TODO", payload: localTodo });
         toast.success("Tarea creada correctamente");
       } catch (err) {

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Todo, UpdateTodoDTO } from "@/lib/types";
+import { ClipboardList } from "lucide-react";
 import { TodoItem } from "./TodoItem";
 
 interface TodoListProps {
@@ -16,12 +17,20 @@ export function TodoList({
   onDelete,
 }: TodoListProps) {
   if (isLoading) {
+    const skeletonColors = [
+      "bg-[#ffcf73] border-[#f3c568]",
+      "bg-[#ff9a74] border-[#f58a63]",
+      "bg-[#dedad3] border-[#cec8bf]",
+      "bg-[#b591ff] border-[#a886ef]",
+      "bg-[#dceb75] border-[#d0dd67]",
+      "bg-[#ffc8dd] border-[#f1bad0]",
+    ];
     return (
-      <div className="flex flex-col gap-3">
-        {[1, 2, 3].map((i) => (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
+        {[1, 2, 3,4].map((i) => (
           <div
             key={i}
-            className="h-20 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800"
+            className={`h-[20rem] animate-pulse rounded-[1.9rem] border ${skeletonColors[(i - 1) % skeletonColors.length]}`}
           />
         ))}
       </div>
@@ -30,21 +39,56 @@ export function TodoList({
 
   if (todos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="mb-3 text-4xl">📝</div>
-        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          No hay tareas por aquí
-        </p>
-        <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-          Agrega una nueva tarea para comenzar
-        </p>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4">
+        {[
+          {
+            bg: "bg-[#ffcf73]",
+            border: "border-[#f3c568]",
+            icon: "text-[#f1b53d]",
+          },
+          {
+            bg: "bg-[#ff9a74]",
+            border: "border-[#f58a63]",
+            icon: "text-[#ef774e]",
+          },
+            {
+              bg: "bg-[#b591ff]",
+              border: "border-[#a886ef]",
+              icon: "text-[#9c78e8]",
+            },
+            {
+              bg: "bg-[#dceb75]",
+              border: "border-[#d0dd67]",
+              icon: "text-[#b0c34d]",
+            },
+        ].map((item, i) => (
+          <div
+            key={i}
+            className={`flex min-h-[20rem] flex-col items-center justify-center rounded-[1.9rem] border p-8 text-center ${item.bg} ${item.border}`}
+          >
+            <ClipboardList
+              className={`mb-4 h-8 w-8 ${item.icon}`}
+              aria-hidden="true"
+            />
+            {i === 0 && (
+              <>
+                <p className="text-2xl font-medium tracking-[-0.04em] text-[color:var(--foreground)]/85">
+                  No hay tareas por aquí
+                </p>
+                <p className="mt-3 max-w-[20ch] text-sm text-[color:var(--foreground)]/55">
+                  Agrega una nueva tarea para comenzar
+                </p>
+              </>
+            )}
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
     <ul
-      className="grid grid-cols-1 md:grid-cols-2 gap-2"
+      className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-4"
       role="list"
       aria-label="Lista de tareas"
     >
