@@ -1,36 +1,27 @@
-export function getAuthErrorMessage(message: string): string {
-  const normalized = message.toLowerCase();
+import type { AuthError } from "@supabase/supabase-js";
 
-  if (
-    normalized.includes("invalid login credentials") ||
-    normalized.includes("invalid email or password")
-  ) {
-    return "El email o la contraseña son incorrectos.";
+type AuthLikeError = Pick<AuthError, "message" | "code">;
+type AuthErrorCode = Exclude<AuthError["code"], undefined>;
+
+const AUTH_ERROR_MESSAGES: Partial<Record<AuthErrorCode, string>> = {
+  email_exists: "Ese correo ya está registrado. Intenta iniciar sesión.",
+  email_not_confirmed: "Debes confirmar tu email antes de iniciar sesión.",
+  signup_disabled: "El registro está deshabilitado temporalmente.",
+  user_already_exists: "Ese correo ya está registrado. Intenta iniciar sesión.",
+  user_banned: "Tu cuenta no puede iniciar sesión en este momento.",
+  user_not_found: "No encontramos una cuenta con ese correo.",
+  validation_failed: "Revisa los datos ingresados e inténtalo nuevamente.",
+  weak_password: "La contraseña no cumple los requisitos de seguridad.",
+  over_request_rate_limit: "Demasiados intentos. Espera un momento e inténtalo otra vez.",
+  over_email_send_rate_limit:
+    "Se alcanzó el límite de envíos de email. Intenta nuevamente más tarde.",
+  request_timeout: "La solicitud tardó demasiado. Intenta nuevamente.",
+  invalid_credentials: "El email o la contraseña son incorrectos.",
+};
+
+export function getAuthErrorMessage(error: AuthLikeError): string {
+  if (error.code && error.code in AUTH_ERROR_MESSAGES) {
+    return AUTH_ERROR_MESSAGES[error.code] ?? error.message;
   }
-
-  if (normalized.includes("email not confirmed")) {
-    return "Debes confirmar tu email antes de iniciar sesión.";
-  }
-
-  if (normalized.includes("user already registered")) {
-    return "Ese correo ya está registrado. Intenta iniciar sesión.";
-  }
-
-  if (normalized.includes("password should be at least")) {
-    return "La contraseña debe tener al menos 6 caracteres.";
-  }
-
-  if (normalized.includes("unable to validate email address")) {
-    return "El email ingresado no es válido.";
-  }
-
-  if (normalized.includes("signup is disabled")) {
-    return "El registro está deshabilitado temporalmente.";
-  }
-
-  if (normalized.includes("network") || normalized.includes("fetch")) {
-    return "No se pudo conectar con el servidor. Intenta nuevamente.";
-  }
-
-  return message;
+  return error.message;
 }

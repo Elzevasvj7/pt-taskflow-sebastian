@@ -48,7 +48,7 @@ export const LoginForm = () => {
     });
 
     if (error) {
-      setErrorMessage(getAuthErrorMessage(error.message));
+      setErrorMessage(getAuthErrorMessage(error));
     } else {
       setSuccessMessage("Inicio de sesión exitoso. Redirigiendo...");
       router.push("/");
@@ -62,7 +62,6 @@ export const LoginForm = () => {
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsGithubLoading(true);
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
@@ -71,7 +70,7 @@ export const LoginForm = () => {
     });
 
     if (error) {
-      setErrorMessage(getAuthErrorMessage(error.message));
+      setErrorMessage(getAuthErrorMessage(error));
       setIsGithubLoading(false);
     }
   }

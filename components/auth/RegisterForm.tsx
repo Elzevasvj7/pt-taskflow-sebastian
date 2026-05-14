@@ -58,7 +58,7 @@ export const RegisterForm = () => {
     });
 
     if (error) {
-      setErrorMessage(getAuthErrorMessage(error.message));
+      setErrorMessage(getAuthErrorMessage(error));
     } else {
       setSuccessMessage(
         "Registro enviado. Si el correo puede registrarse, revisa tu email para continuar.",
